@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>武汉地铁</title>
+    <link rel="stylesheet" href="../libs/Cesium/Widgets/widgets.css">
+    <link rel="stylesheet" href="../libs/supermap/pretty.css">
+    <script type="text/javascript" src="../libs/jquery/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="../libs/supermap/SuperMap.Include.js"></script>
+    <script type="text/javascript" src="../libs/jquery/require.min.js" data-main="../libs/supermap/main"></script>
+    <style>
+        html,
+        body,
+        #cesiumContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000000;
+        }
+
+        .cesium-viewer-bottom {
+            display: none;
+        }
+
+        .subway-menu {
+            position: absolute;
+            z-index: 100;
+            left: 10px;
+            top: 10px;
+            background: #fff;
+            border: solid 1px #ccc;
+            opacity: .9;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .subway-item {
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px;
+        }
+
+        .subway-icon {
+            position: relative;
+            bottom: 2px;
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+        }
+
+        .subway-txt {
+            padding-left: 5px;
+        }
+
+        .subway-state {
+            background: #4995e4;
+            border-radius: 6px;
+            padding-left: 5px;
+            padding-right: 5px;
+            margin-left: 5px;
+            color: white;
+            font-size: 12px;
+        }
+    </style>
+    <script src="../utils/baiduConverter.js"></script>
+    <script src="../utils/coorTransform.js"></script>
+    <script src="metro.js"></script>
+    <script src="metro2.js"></script>
+
+</head>
+
+<body>
+<div id="cesiumContainer"></div>
+<div id='loadingbar' class="spinner">
+    <div class="spinner-container container1">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container2">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+    <div class="spinner-container container3">
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+        <div class="circle4"></div>
+    </div>
+</div>
+<div class="subway-menu">
+    <div class="subway-col">
+        <div class="subway-item" lid="轨道交通1号线">
+            <span class="subway-icon" style="background-color:#0066CC"></span>
+            <span class="subway-txt">1号线</span>
+        </div>
+        <div class="subway-item" lid="轨道交通2号线">
+            <span class="subway-icon" style="background-color:#ED9CC7"></span>
+            <span class="subway-txt">2号线</span>
+        </div>
+        <div class="subway-item" lid="轨道交通3号线">
+            <span class="subway-icon" style="background-color:#cc911f"></span>
+            <span class="subway-txt">3号线</span>
+        </div>
+        <div class="subway-item" lid="轨道交通4号线">
+            <span class="subway-icon" style="background-color:#9CCA0D"></span>
+            <span class="subway-txt">4号线</span>
+        </div>
+        <div class="subway-item" lid="轨道交通5号线">
+            <span class="subway-icon" style="background-color:#9CCA0D"></span>
+            <span class="subway-txt">5号线</span>
+            <span class="subway-state">建设中</span>
+        </div>
+        <div class="subway-item" lid="轨道交通6号线">
+            <span class="subway-icon" style="background-color:#46BC54"></span>
+            <span class="subway-txt">6号线</span>
+        </div>
+        <div class="subway-item" lid="轨道交通7号线">
+            <span class="subway-icon" style="background-color:#dc8d43"></span>
+            <span class="subway-txt">7号线</span>
+        </div>
+        <div class="subway-item" lid="轨道交通8号线(一期)">
+            <span class="subway-icon" style="background-color:#5E8C99"></span>
+            <span class="subway-txt">8号线(一期)</span>
+        </div>
+        <div class="subway-item" lid="轨道交通8号线(二期)">
+            <span class="subway-icon" style="background-color:#5E8C99"></span>
+            <span class="subway-txt">8号线(二期)</span>
+            <span class="subway-state">建设中</span>
+        </div>
+        <div class="subway-item" lid="轨道交通11号线">
+            <span class="subway-icon" style="background-color:#EAC321"></span>
+            <span class="subway-txt">11号线</span>
+        </div>
+        <div class="subway-item" lid="轨道交通11号线东段二期">
+            <span class="subway-icon" style="background-color:#EAC321"></span>
+            <span class="subway-txt">11号线(二期)</span>
+        </div>
+        <div class="subway-item" lid="阳逻线">
+            <span class="subway-icon" style="background-color:#BF3CAC"></span>
+            <span class="subway-txt">阳逻线</span>
+        </div>
+        <div class="subway-item" lid="蔡甸线">
+            <span class="subway-icon" style="background-color:#9CCA0D"></span>
+            <span class="subway-txt">蔡甸线</span>
+            <span class="subway-state">建设中</span>
+        </div>
+    </div>
+</div>
+<script>
+    var viewer = null;
+
+    function onload(Cesium) {
+        viewer = new Cesium.Viewer('cesiumContainer', {
+            imageryProvider: new Cesium.UrlTemplateImageryProvider({
+                url: 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
+                // url: 'http://172.29.1.151:8080/osm/{z}/{x}/{y}.png',
+            })
+        });
+        var scene = viewer.scene;
+        $('#loadingbar').remove();
+
+        $(".subway-item").on("mouseover", function () {
+            var name = $(this).attr("lid");
+            var entities = viewer.entities.values.filter(function (entity) {
+                return entity.name == "武汉" + name;
+            });
+            entities[0].polyline.width = 10;
+            viewer.zoomTo(entities[0]);
+        });
+        $(".subway-item").on("mouseout", function () {
+            var name = $(this).attr("lid");
+            var entities = viewer.entities.values.filter(function (entity) {
+                return entity.name == "武汉" + name;
+            });
+            entities[0].polyline.width = 5;
+        });
+
+        // 武汉地铁 === 正在运营中
+        for (var i = 0; i < train.length; i++) {
+            var ps = train[i].split(",");
+            var np = [];
+            var coor = [];
+            for (var j = 0; j < ps.length; j = j + 2) {
+                var p = baiduTransform.Mercator2BD09(parseFloat(ps[j]), parseFloat(ps[j + 1]));
+                p = coordinateTransform.bd09togcj02(p[0], p[1]);
+                p = coordinateTransform.gcj02towgs84(p[0], p[1]);
+                coor.push(p[0], p[1]);
+                np.push(Cesium.Cartesian3.fromDegrees(p[0], p[1], 0.1));
+            }
+            viewer.entities.add({
+                name: "武汉" + lineName[i],
+                polyline: {
+                    positions: np,
+                    width: 5,
+                    material: Cesium.Color.fromCssColorString(lineColor[i])
+                }
+            });
+            // console.log("name:" + "武汉" + lineName[i] + ",color:" + lineColor[i] + ",path:" + coor.concat(','));
+        }
+
+        for (var i = 0; i < lineStop.length; i++) {
+            var stations = lineStop[i];
+            for (var j = 0; j < stations.length; j++) {
+                var coordinate = stations[j].geo.split(",");
+                var p = baiduTransform.Mercator2BD09(parseFloat(coordinate[0]), parseFloat(coordinate[1]));
+                p = coordinateTransform.bd09togcj02(p[0], p[1]);
+                p = coordinateTransform.gcj02towgs84(p[0], p[1]);
+                console.log("name:" + (i+1) + ";" + stations[j].name + ";" + p[0] + "," + p[1]);
+                viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(p[0], p[1]),
+                    label: {
+                        text: stations[j].name,
+                        font: '12px Helvetica',
+                        fillColor: Cesium.Color.SKYBLUE,
+                        outlineColor: Cesium.Color.BLACK,
+                        outlineWidth: 2,
+                        showBackground: true,
+                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                        scaleByDistance: new Cesium.NearFarScalar(0, 2, 20000, 0.5),
+                        translucencyByDistance: new Cesium.NearFarScalar(20000, 1, 50000, 0)
+                    }
+                });
+            }
+
+        }
+
+        // 建设中
+        for (var i = 0; i < lines_temp.length; i++) {
+            var ps = lines_temp[i].split(",");
+            var np = [];
+            for (var j = 0, l = ps.length / 2; j < l; j++) {
+                var p = coordinateTransform.gcj02towgs84(ps[j], ps[j + l]);
+                np.push(Cesium.Cartesian3.fromDegrees(p[0], p[1], 0.1));
+            }
+            viewer.entities.add({
+                name: "武汉" + names_temp[i],
+                polyline: {
+                    positions: np,
+                    width: 5,
+                    material: new Cesium.PolylineDashMaterialProperty({
+                        color: Cesium.Color.fromCssColorString("#cccccc")
+                    })
+                }
+            });
+        }
+
+        for (var i = 0; i < stops_temp.length; i++) {
+            var stations = stops_temp[i];
+            for (var j = 0; j < stations.length; j++) {
+                var coordinate = stations[j].xy_coords.split(";");
+                var p = coordinateTransform.gcj02towgs84(parseFloat(coordinate[0]), parseFloat(coordinate[1]));
+                viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(p[0], p[1]),
+                    label: {
+                        text: stations[j].name,
+                        font: '12px Helvetica',
+                        fillColor: Cesium.Color.SKYBLUE,
+                        outlineColor: Cesium.Color.BLACK,
+                        outlineWidth: 2,
+                        showBackground: true,
+                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                        scaleByDistance: new Cesium.NearFarScalar(0, 2, 20000, 0.5),
+                        translucencyByDistance: new Cesium.NearFarScalar(20000, 1, 50000, 0)
+                    }
+                });
+            }
+
+        }
+
+
+        viewer.zoomTo(viewer.entities);
+    }
+</script>
+</body>
+
+</html>
