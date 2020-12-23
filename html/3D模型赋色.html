@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>3D模型赋色</title>
-    <link rel="stylesheet" href="http://localhost:8080/libs/Cesium/1.40/Build/Cesium/Widgets/widgets.css">
-    <script type="text/javascript" src="http://localhost:8080/plugin/jquery/jquery-3.2.1.min.js"></script>
-    <script type="text/javascript" src="http://localhost:8080/libs/Cesium/1.40/Build/Cesium/Cesium.js"></script>
+    <script src="https://cesiumjs.org/releases/1.76/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesiumjs.org/releases/1.76/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script type="text/javascript" src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.4.1.min.js"></script>
     <style>
         html, body, #cesiumContainer {
             width: 100%;
@@ -116,8 +116,8 @@
         timeline: false,//是否显示时间轴，底部
         navigationHelpButton: false,//是否显示帮助按钮，右上角按钮
         imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
-            // url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" // 自定义底图
-            url:"https://server.hxct.com/server/rest/services//GoogleMap/MapServer"
+            url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" // 自定义底图
+            // url:"https://server.hxct.com/server/rest/services//GoogleMap/MapServer"
         })
     });
 
