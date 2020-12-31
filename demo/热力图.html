@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Use correct character set. -->
+    <meta charset="utf-8">
+    <!-- Tell IE to use the latest, best version. -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>热力图</title>
+    <script src="https://cesiumjs.org/releases/1.76/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesiumjs.org/releases/1.76/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/heatmap.js/2.0.2/heatmap.js"></script>
+    <style>
+        html,
+        body,
+        #cesiumContainer {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: absolute;
+        }
+ 
+        .div-heatmap {
+            width: 600px;
+            height: 400px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="cesiumContainer"></div>
+<!--热力图容器-->
+<div class="div-heatmap"></div>
+<script>
+    var points = [];
+    var width = 600;
+    var height = 400;
+    var max = 100;
+ 
+    // 热力图经纬度范围
+    var latMin = 28.364807;
+    var latMax = 40.251095;
+    var lonMin = 94.389228;
+    var lonMax = 108.666357;
+    // 根据热力图图片范围，生成随机热力点和强度值
+    for (var i = 0; i < 300; i++) {
+        var lon = lonMin + Math.random() * (lonMax - lonMin);
+        var lat = latMin + Math.random() * (latMax - latMin);
+        var value = Math.floor(Math.random() * max);
+        var point = {
+            x: Math.floor((lat - latMin) / (latMax - latMin) * width),
+            y: Math.floor((lon - lonMin) / (lonMax - lonMin) * height),
+            value: value
+        };
+        points.push(point);
+    }
+ 
+    // 创建热力图  使用JavaScript库heatmap.js
+    var heatmapInstance = h337.create({
+        container: document.querySelector('.div-heatmap')
+    });
+ 
+    var data = {
+        max: max,
+        data: points
+    };
+    heatmapInstance.setData(data);
+ 
+    // 将热力图添加到球体上(生成的热力图canvas元素类名为heatmap-canvas)
+    var canvas = document.getElementsByClassName('heatmap-canvas');
+ 
+    // 更换默认Ion的accesstoken，初始化Cesium
+    var viewer = new Cesium.Viewer('cesiumContainer', {
+        animation: false,
+        timeline: false
+    });
+    viewer.entities.add({
+        name: 'heatmap',
+        rectangle: {
+            coordinates: Cesium.Rectangle.fromDegrees(lonMin, latMin, lonMax, latMax),
+            material: new Cesium.ImageMaterialProperty({
+                image: canvas[0],
+                transparent: true
+            })
+        }
+    });
+ 
+    viewer.zoomTo(viewer.entities);
+</script>
+</body>
+</html>
