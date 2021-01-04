@@ -15,8 +15,8 @@
             overflow: hidden;
         }
     </style>
-    <link rel="stylesheet" href="../libs/Cesium08/Widgets/widgets.css">
-    <script src="../libs/Cesium08/Cesium.js"></script>
+    <script src="https://cesiumjs.org/releases/1.76/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesiumjs.org/releases/1.76/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 
 </head>
 
@@ -24,8 +24,13 @@
 <div id="cesiumContainer"></div>
 <script>
     var viewer = new Cesium.Viewer('cesiumContainer', {
-        imageryProvider: new Cesium.UrlTemplateImageryProvider({
-            url: 'http://www.google.cn/maps/vt?lyrs=s@716&x={x}&y={y}&z={z}'
+        imageryProvider: new Cesium.WebMapTileServiceImageryProvider({
+            url: "http://t0.tianditu.com/img_w/wmts?tk=4f62e1d82bd46e2ff470b291c2260156&service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles",
+            layer: "tdtBasicLayer",
+            style: "default",
+            format: "image/jpeg",
+            tileMatrixSetID: "GoogleMapsCompatible",
+            show: false
         })
     });
     var scene = viewer.scene;
