@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>鹰眼图</title>
+    <script src="https://cesiumjs.org/releases/1.76/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesiumjs.org/releases/1.76/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <style>
+        #eye {
+            position: absolute;
+            width: 20%;
+            height: 20%;
+            bottom: 50px;
+            right: 30px;
+            z-index: 999;
+            border: solid blue 1px;
+        }
+        .cesium-viewer-bottom{
+            display: none;
+        }
+    </style>
+</head>
+<div style="width:1500px;height:700px;">
+    <div id="cesiumContainer" style="width:100%;height:100%;"></div>
+    <div id="eye"></div>
+</div>
+</html>
+<script>
+    //1.创建双球
+    var viewer = new Cesium.Viewer('cesiumContainer',{
+      baseLayerPicker: false,
+      imageryProvider: new Cesium.WebMapTileServiceImageryProvider({
+        url: "http://t0.tianditu.com/img_w/wmts?tk=4f62e1d82bd46e2ff470b291c2260156&service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles",
+        layer: "tdtBasicLayer",
+        style: "default",
+        format: "image/jpeg",
+        tileMatrixSetID: "GoogleMapsCompatible",
+        show: false
+      }),
+      geocoder:false,
+      homeButton:false,
+      sceneModePicker:false,
+      baseLayerPicker:false,
+      navigationHelpButton:false,
+      animation:false,
+      timeline:false,
+      fullscreenButton:false
+    });
+    var viewer1 = new Cesium.Viewer('eye',{
+      baseLayerPicker: false,
+      imageryProvider: new Cesium.WebMapTileServiceImageryProvider({
+        url: "http://t0.tianditu.com/img_w/wmts?tk=4f62e1d82bd46e2ff470b291c2260156&service=wmts&request=GetTile&version=1.0.0&LAYER=img&tileMatrixSet=w&TileMatrix={TileMatrix}&TileRow={TileRow}&TileCol={TileCol}&style=default&format=tiles",
+        layer: "tdtBasicLayer",
+        style: "default",
+        format: "image/jpeg",
+        tileMatrixSetID: "GoogleMapsCompatible",
+        show: false
+      }),
+      geocoder:false,
+      homeButton:false,
+      sceneModePicker:false,
+      baseLayerPicker:false,
+      navigationHelpButton:false,
+      animation:false,
+      timeline:false,
+      fullscreenButton:false
+    });
+
+    //2.设置鹰眼图中球属性
+    let control = viewer1.scene.screenSpaceCameraController;
+    control.enableRotate = false;
+    control.enableTranslate = false;
+    control.enableZoom = false;
+    control.enableTilt = false;
+    control.enableLook = false;
+    let syncViewer = function() {
+        viewer1.camera.flyTo({
+            destination: viewer.camera.position,
+            orientation: {
+                heading: viewer.camera.heading,
+                pitch: viewer.camera.pitch,
+                roll: viewer.camera.roll
+            },
+            duration: 0.0
+        });
+    };
+
+    //3. 同步
+    viewer.entities.add({
+        position : Cesium.Cartesian3.fromDegrees(0, 0),
+        label : {
+            text : new Cesium.CallbackProperty(function(){
+                syncViewer();
+                return "";
+            }, true)
+        }
+    });
+
+</script>
